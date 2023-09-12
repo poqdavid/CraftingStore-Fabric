@@ -4,15 +4,26 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.craftingstore.core.CraftingStorePlugin;
 import net.craftingstore.core.PluginConfiguration;
 import net.craftingstore.core.logging.CraftingStoreLogger;
+import net.craftingstore.core.logging.impl.JavaLogger;
 import net.craftingstore.core.models.donation.Donation;
+import network.roanoke.craftingstore.utils.MultiThreading;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 public class CraftingStoreFabricImpl implements CraftingStorePlugin {
 
     private CraftingStoreFabric fabricPlugin;
+    private JavaLogger logger;
+    private PluginConfiguration pluginConfiguration;
 
     CraftingStoreFabricImpl(CraftingStoreFabric fabricPlugin) {
         this.fabricPlugin = fabricPlugin;
+        this.logger = new JavaLogger(Logger.getLogger("CraftingStore"));
+        this.pluginConfiguration = new FabricPluginConfiguration(fabricPlugin);
     }
+
     @Override
     public boolean executeDonation(Donation donation) {
         if (donation.getPlayer().isRequiredOnline()) {
@@ -30,22 +41,22 @@ public class CraftingStoreFabricImpl implements CraftingStorePlugin {
             return false;
         }
 
-        return false;
+        return true;
     }
 
     @Override
     public CraftingStoreLogger getLogger() {
-        return null;
+        return this.logger;
     }
 
     @Override
     public void registerRunnable(Runnable runnable, int i, int i1) {
-
+        MultiThreading.schedule(runnable, (long) i, (long) i1, TimeUnit.SECONDS);
     }
 
     @Override
     public void runAsyncTask(Runnable runnable) {
-
+        MultiThreading.runAsync(runnable);
     }
 
     @Override
@@ -55,6 +66,6 @@ public class CraftingStoreFabricImpl implements CraftingStorePlugin {
 
     @Override
     public PluginConfiguration getConfiguration() {
-        return null;
+        return this.pluginConfiguration;
     }
 }
