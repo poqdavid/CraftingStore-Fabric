@@ -5,11 +5,13 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.MinecraftServer;
 import network.roanoke.craftingstore.commands.CraftingStoreCommand;
+import network.roanoke.craftingstore.utils.Config;
 
 public class CraftingStoreFabric implements ModInitializer {
 
     private CraftingStore craftingStore;
     private MinecraftServer server;
+    public Config config = new Config();
 
     @Override
     public void onInitialize() {
@@ -23,5 +25,13 @@ public class CraftingStoreFabric implements ModInitializer {
 
     public MinecraftServer getServer() {
         return this.server;
+    }
+
+    public CraftingStore getCraftingStore() {
+        return this.craftingStore;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.config.setApiKey(apiKey);
     }
 }

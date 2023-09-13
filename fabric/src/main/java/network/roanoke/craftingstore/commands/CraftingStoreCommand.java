@@ -10,6 +10,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import network.roanoke.craftingstore.CraftingStoreFabric;
 
+import java.util.concurrent.ExecutionException;
+
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -25,18 +27,40 @@ public class CraftingStoreCommand {
             dispatcher.register(
                     literal("craftingstore")
                             .requires(Permissions.require("craftingstore.admin", 4))
-                            .then(argument("api-key", StringArgumentType.string())
-                                    .executes(this::setApiKey)
+                            .then(
+                                    literal("api")
+                                            .then(argument("api-key", StringArgumentType.string())
+                                                    .executes(this::setApiKey)
+                                            )
+                            )
+                            .then(
+                                    literal("reload")
+                                            .executes(this::reloadConfig)
                             )
             );
         });
+    }
 
+    private int reloadConfig(CommandContext<ServerCommandSource> ctx) {
+        instance.getCraftingStore().reload();
+        ctx.getSource().sendMessage(Text.literal("CraftingStore is reloading..."));
+        return 1;
     }
 
 
     private int setApiKey(CommandContext<ServerCommandSource> ctx) {
         String apiKey = StringArgumentType.getString(ctx, "api-key");
-        // actually set this
+        instance.setApiKey(apiKey);
+        instance.config.save();
+        try {
+            if (instance.getCraftingStore().reload().get()) {
+                ctx.getSource().sendMessage(Text.literal("The new API key has been set in the config, and the plugin has been reloaded."));
+            } else {
+                ctx.getSource().sendMessage(Text.literal("The API key is invalid. The plugin will not work until you set a valid API key."));
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
         return 1;
     }
 }

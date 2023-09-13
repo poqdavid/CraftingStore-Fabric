@@ -61,7 +61,7 @@ public class CraftingStoreFabricImpl implements CraftingStorePlugin {
 
     @Override
     public String getToken() {
-        return null;
+        return fabricPlugin.config.getApiKey();
     }
 
     @Override
